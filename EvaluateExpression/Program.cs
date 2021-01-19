@@ -10,29 +10,37 @@ namespace EvaluateExpression
 {
     class Program
     {
+        static string separator = "_";
         static void Main(string[] args)
         {
-            //string expression = "(2+1)+((5*2)-(15-6)*4)";
             //https://www.dcode.fr/reverse-polish-notation
             //https://www.youtube.com/watch?v=QxHRM0EQHiQ&t=398s&ab_channel=ErbComputerScience
             //https://www.youtube.com/watch?v=vnxOTu44-xg&ab_channel=ErbComputerScience
             List<string> list_expression = new List<string>();
             list_expression.Add("(2+1)+((5*2)-(5-6)*4)");
+            list_expression.Add("(2+1)+((15*2)-(5-6)*4)");
             list_expression.Add("1+2*3-4");
             list_expression.Add("(4+7)+12/3");
             list_expression.Add("6*3-(4-5)+2");
 
             string[] lines = File.ReadAllLines("data.txt");
-
-            for(int i =0; i<lines.Length;i++)
+            for (int i = 0; i < list_expression.Count; i++)
             {
+                Console.ForegroundColor = ConsoleColor.White;
+                Console.WriteLine("EXPRESSION:" + list_expression[i]);
+                Console.WriteLine("--------------------------------------");
                 Console.ForegroundColor = ConsoleColor.Green;
-                Console.WriteLine(string.Equals(lines[i],RPN(list_expression[i])));
-                Console.WriteLine(solve_RPN(RPN(list_expression[i])));
+                Console.WriteLine("RPN FORM: " + RPN(list_expression[i]));
+                Console.WriteLine("--------------------------------------");
+                Console.WriteLine(string.Equals(lines[i], solve_RPN(RPN(list_expression[i]))));
+                Console.WriteLine("RESULT: " + solve_RPN(RPN(list_expression[i])));
+                Console.WriteLine("***********************************************");
+                Console.WriteLine();
             }
 
-            Console.WriteLine("*********************");
-
+            //Console.WriteLine(solve_RPN("2_1_+_15_2_*_5_6_-_4_*_-_+_"));
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.WriteLine("Made by DragoShell");
             Console.ReadKey();
         }
 
@@ -42,10 +50,19 @@ namespace EvaluateExpression
             Stack mystack = new Stack();
             StringBuilder sb = new StringBuilder();
 
+
             for (int i = 0; i < expression.Length; i++)
                 if (Char.IsDigit(expression[i]))
                 {
-                    sb.Append(expression[i]);
+                    StringBuilder sb_nr = new StringBuilder();
+                    int k = i;
+                    while (i < expression.Length - 1 && Char.IsDigit(expression[i + 1]))
+                        i++;
+                    for (int j = k; j <= i; j++)
+                    {
+                        sb_nr.Append(expression[j]);
+                    }
+                    sb.Append(sb_nr.ToString() + separator);
                 }
                 else
                 {
@@ -57,12 +74,8 @@ namespace EvaluateExpression
                         {
                             if (mystack.Count > 0 && (char)mystack.Peek() != '(')
                             {
-                                sb.Append(mystack.Pop());
+                                sb.Append(mystack.Pop().ToString() + separator);
                             }
-                            /* if (mystack.Count > 0)
-                             {
-                                 mystack.Pop();
-                             }*/
                         }
                         if (mystack.Count > 0)
                         {
@@ -80,7 +93,7 @@ namespace EvaluateExpression
                             {
                                 if ((char)mystack.Peek() != '(')
                                 {
-                                    sb.Append(mystack.Pop());
+                                    sb.Append(mystack.Pop().ToString() + separator);
                                 }
 
                             }
@@ -91,18 +104,24 @@ namespace EvaluateExpression
                             mystack.Push(expression[i]);
                         }
                     }
-
-                    //mystack.Push(expression[i]);
                 }
 
-            foreach (var var in mystack)
-                sb.Append(var);
 
-            Console.WriteLine("Expression:" + sb);
-            //foreach (var var in mystack)
-                //Console.WriteLine(var);
-            Console.WriteLine("end");
-            //Console.ReadKey();
+            int u = 0;
+            foreach (var var in mystack)
+            {
+                if (u == mystack.Count - 1)
+                {
+                    sb.Append(var);
+                }
+                else
+                {
+                    sb.Append(var + separator);
+                }
+                u++;
+            }
+
+
             Console.ForegroundColor = ConsoleColor.Green;
             return sb.ToString();
         }
@@ -141,7 +160,15 @@ namespace EvaluateExpression
             {
                 if (Char.IsDigit(expression[i]))
                 {
-                    mystack.Push(expression[i].ToString());
+                    StringBuilder sb_nr = new StringBuilder();
+                    int k = i;
+                    while (i < expression.Length - 1 && Char.IsDigit(expression[i + 1]))
+                        i++;
+                    for (int j = k; j <= i; j++)
+                    {
+                        sb_nr.Append(expression[j]);
+                    }
+                    mystack.Push(sb_nr.ToString());
                 }
                 else if (IsOperator(expression[i]))
                 {
@@ -176,3 +203,4 @@ namespace EvaluateExpression
         }
     }
 }
+
